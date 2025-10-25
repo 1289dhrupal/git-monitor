@@ -1,9 +1,4 @@
 <script setup lang="ts">
-import Checkbox from '@/Components/Checkbox.vue';
-import InputError from '@/Components/InputError.vue';
-import InputLabel from '@/Components/InputLabel.vue';
-import PrimaryButton from '@/Components/PrimaryButton.vue';
-import TextInput from '@/Components/TextInput.vue';
 import GuestLayout from '@/Layouts/GuestLayout.vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
 
@@ -31,52 +26,69 @@ const submit = () => {
     <GuestLayout>
         <Head title="Log in" />
 
-        <div v-if="status" class="mb-4 text-sm font-medium text-green-600">
+        <!-- Replaced div with PrimeVue Message component -->
+        <Message
+            v-if="status"
+            severity="success"
+            :closable="false"
+            class="mb-4"
+        >
             {{ status }}
-        </div>
+        </Message>
 
-        <form @submit.prevent="submit">
-            <div>
-                <InputLabel for="email" value="Email" />
-
-                <TextInput
+        <form @submit.prevent="submit" class="flex flex-col gap-4">
+            <!-- Replaced InputLabel, TextInput, and InputError -->
+            <div class="flex flex-col gap-2">
+                <label for="email">Email</label>
+                <InputText
                     id="email"
                     type="email"
-                    class="mt-1 block w-full"
+                    class="w-full"
                     v-model="form.email"
                     required
                     autofocus
                     autocomplete="username"
+                    :invalid="!!form.errors.email"
                 />
-
-                <InputError class="mt-2" :message="form.errors.email" />
+                <small v-if="form.errors.email" class="p-error">
+                    {{ form.errors.email }}
+                </small>
             </div>
 
-            <div class="mt-4">
-                <InputLabel for="password" value="Password" />
-
-                <TextInput
+            <!-- Replaced InputLabel, TextInput, and InputError -->
+            <div class="flex flex-col gap-2">
+                <label for="password">Password</label>
+                <InputText
                     id="password"
                     type="password"
-                    class="mt-1 block w-full"
+                    class="w-full"
                     v-model="form.password"
                     required
                     autocomplete="current-password"
+                    :invalid="!!form.errors.password"
                 />
-
-                <InputError class="mt-2" :message="form.errors.password" />
+                <small v-if="form.errors.password" class="p-error">
+                    {{ form.errors.password }}
+                </small>
             </div>
 
-            <div class="mt-4 block">
-                <label class="flex items-center">
-                    <Checkbox name="remember" v-model:checked="form.remember" />
-                    <span class="ms-2 text-sm text-gray-600 dark:text-gray-400"
-                        >Remember me</span
-                    >
+            <!-- Replaced Breeze Checkbox with PrimeVue Checkbox -->
+            <div class="flex items-center gap-2">
+                <Checkbox
+                    id="remember"
+                    v-model="form.remember"
+                    binary
+                    name="remember"
+                />
+                <label
+                    for="remember"
+                    class="text-sm text-gray-600 dark:text-gray-400"
+                >
+                    Remember me
                 </label>
             </div>
 
-            <div class="mt-4 flex items-center justify-end">
+            <div class="mt-4 flex items-center justify-end gap-4">
                 <Link
                     v-if="canResetPassword"
                     :href="route('password.request')"
@@ -85,13 +97,12 @@ const submit = () => {
                     Forgot your password?
                 </Link>
 
-                <PrimaryButton
-                    class="ms-4"
-                    :class="{ 'opacity-25': form.processing }"
-                    :disabled="form.processing"
-                >
-                    Log in
-                </PrimaryButton>
+                <!-- Replaced PrimaryButton with PrimeVue Button -->
+                <Button
+                    type="submit"
+                    label="Log in"
+                    :loading="form.processing"
+                />
             </div>
         </form>
     </GuestLayout>

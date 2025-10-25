@@ -2,9 +2,8 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head } from '@inertiajs/vue3';
 
-// Import PrimeVue components
-import Button from 'primevue/button';
-import Card from 'primevue/card';
+// Imports for Button and Card are no longer needed
+// thanks to auto-importing!
 </script>
 
 <template>

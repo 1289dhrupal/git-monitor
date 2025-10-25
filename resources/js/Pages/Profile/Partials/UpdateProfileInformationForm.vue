@@ -1,8 +1,4 @@
 <script setup lang="ts">
-import InputError from '@/Components/InputError.vue';
-import InputLabel from '@/Components/InputLabel.vue';
-import PrimaryButton from '@/Components/PrimaryButton.vue';
-import TextInput from '@/Components/TextInput.vue';
 import { Link, useForm, usePage } from '@inertiajs/vue3';
 
 defineProps<{
@@ -34,35 +30,37 @@ const form = useForm({
             @submit.prevent="form.patch(route('profile.update'))"
             class="mt-6 space-y-6"
         >
-            <div>
-                <InputLabel for="name" value="Name" />
-
-                <TextInput
+            <div class="flex flex-col gap-2">
+                <label for="name">Name</label>
+                <InputText
                     id="name"
                     type="text"
-                    class="mt-1 block w-full"
+                    class="w-full"
                     v-model="form.name"
                     required
                     autofocus
                     autocomplete="name"
+                    :invalid="!!form.errors.name"
                 />
-
-                <InputError class="mt-2" :message="form.errors.name" />
+                <small v-if="form.errors.name" class="p-error">
+                    {{ form.errors.name }}
+                </small>
             </div>
 
-            <div>
-                <InputLabel for="email" value="Email" />
-
-                <TextInput
+            <div class="flex flex-col gap-2">
+                <label for="email">Email</label>
+                <InputText
                     id="email"
                     type="email"
-                    class="mt-1 block w-full"
+                    class="w-full"
                     v-model="form.email"
                     required
                     autocomplete="username"
+                    :invalid="!!form.errors.email"
                 />
-
-                <InputError class="mt-2" :message="form.errors.email" />
+                <small v-if="form.errors.email" class="p-error">
+                    {{ form.errors.email }}
+                </small>
             </div>
 
             <div v-if="mustVerifyEmail && user.email_verified_at === null">
@@ -72,7 +70,7 @@ const form = useForm({
                         :href="route('verification.send')"
                         method="post"
                         as="button"
-                        class="rounded-md text-sm text-gray-600 underline hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:text-gray-400 dark:hover:text-gray-100 dark:focus:ring-offset-gray-800"
+                        class="p-button p-button-link text-sm"
                     >
                         Click here to re-send the verification email.
                     </Link>
@@ -87,7 +85,7 @@ const form = useForm({
             </div>
 
             <div class="flex items-center gap-4">
-                <PrimaryButton :disabled="form.processing">Save</PrimaryButton>
+                <Button type="submit" label="Save" :loading="form.processing" />
 
                 <Transition
                     enter-active-class="transition ease-in-out"

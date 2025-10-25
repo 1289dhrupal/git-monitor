@@ -1,13 +1,46 @@
 <script setup lang="ts">
 import ApplicationLogo from '@/Components/ApplicationLogo.vue';
-import Dropdown from '@/Components/Dropdown.vue';
-import DropdownLink from '@/Components/DropdownLink.vue';
-import NavLink from '@/Components/NavLink.vue';
-import ResponsiveNavLink from '@/Components/ResponsiveNavLink.vue';
-import { Link } from '@inertiajs/vue3';
-import { ref } from 'vue';
+import { Link, usePage } from '@inertiajs/vue3';
+import { computed, ref } from 'vue';
+
+// Define types for user props if available, adjust as needed
+interface User {
+    name: string;
+    email: string;
+}
+
+const page = usePage();
+const user = computed(() => page.props.auth.user as User); // Type assertion
 
 const showingNavigationDropdown = ref(false);
+
+const menu = ref(); // Ref for the PrimeVue Menu component
+const menuItems = ref([
+    {
+        label: 'Profile',
+        icon: 'pi pi-user',
+        route: 'profile.edit', // Use route name for command
+    },
+    {
+        label: 'Log Out',
+        icon: 'pi pi-sign-out',
+        route: 'logout', // Use route name for command
+        method: 'post', // Specify method for Inertia link
+    },
+]);
+
+// Function to toggle the PrimeVue menu
+const toggleMenu = (event: Event) => {
+    menu.value.toggle(event);
+};
+
+// Import router from inertiajs/vue3 if not already available globally
+import { router } from '@inertiajs/vue3';
+
+// Function to navigate using Inertia
+const navigate = (routeName: string) => {
+    router.get(route(routeName));
+};
 </script>
 
 <template>
@@ -33,150 +66,142 @@ const showingNavigationDropdown = ref(false);
                             <div
                                 class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex"
                             >
-                                <NavLink
-                                    :href="route('dashboard')"
-                                    :active="route().current('dashboard')"
-                                >
-                                    Dashboard
-                                </NavLink>
+                                <!-- Replace Link with Button -->
+                                <Button
+                                    @click="navigate('dashboard')"
+                                    label="Dashboard"
+                                    link
+                                    :class="[
+                                        '!inline-flex !items-center !border-b-2 !px-1 !pt-1 !text-sm !font-medium !transition !duration-150 !ease-in-out',
+                                        route().current('dashboard')
+                                            ? '!focus:outline-none !focus:border-indigo-700 !border-indigo-400 !text-gray-900 dark:!border-indigo-600 dark:!text-gray-100'
+                                            : '!focus:outline-none !focus:text-gray-700 dark:!focus:text-gray-300 !focus:border-gray-300 dark:!focus:border-gray-700 !border-transparent !text-gray-500 hover:!border-gray-300 hover:!text-gray-700 dark:!text-gray-400 dark:hover:!border-gray-700 dark:hover:!text-gray-300',
+                                    ]"
+                                />
+                                <!-- Add other NavLinks here using Button link -->
                             </div>
                         </div>
 
                         <div class="hidden sm:ms-6 sm:flex sm:items-center">
                             <!-- Settings Dropdown -->
                             <div class="relative ms-3">
-                                <Dropdown align="right" width="48">
-                                    <template #trigger>
-                                        <span class="inline-flex rounded-md">
-                                            <button
-                                                type="button"
-                                                class="inline-flex items-center rounded-md border border-transparent bg-white px-3 py-2 text-sm font-medium leading-4 text-gray-500 transition duration-150 ease-in-out hover:text-gray-700 focus:outline-none dark:bg-gray-800 dark:text-gray-400 dark:hover:text-gray-300"
-                                            >
-                                                {{ $page.props.auth.user.name }}
-
-                                                <svg
-                                                    class="-me-0.5 ms-2 h-4 w-4"
-                                                    xmlns="http://www.w3.org/2000/svg"
-                                                    viewBox="0 0 20 20"
-                                                    fill="currentColor"
-                                                >
-                                                    <path
-                                                        fill-rule="evenodd"
-                                                        d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                                                        clip-rule="evenodd"
-                                                    />
-                                                </svg>
-                                            </button>
-                                        </span>
-                                    </template>
-
-                                    <template #content>
-                                        <DropdownLink
-                                            :href="route('profile.edit')"
+                                <Button
+                                    @click="toggleMenu"
+                                    type="button"
+                                    icon="pi pi-user"
+                                    :label="user.name"
+                                    text
+                                    rounded
+                                    aria-haspopup="true"
+                                    aria-controls="overlay_menu"
+                                    class="!inline-flex !items-center !text-sm !font-medium !leading-4 !text-gray-500 hover:!text-gray-700 dark:!text-gray-400 dark:hover:!text-gray-300"
+                                >
+                                    <i class="pi pi-angle-down ml-2"></i>
+                                    <!-- Use PrimeVue icon -->
+                                </Button>
+                                <Menu
+                                    ref="menu"
+                                    id="overlay_menu"
+                                    :model="menuItems"
+                                    :popup="true"
+                                >
+                                    <template #item="{ item, props }">
+                                        <Link
+                                            :href="route(item.route)"
+                                            :method="item.method || 'get'"
+                                            as="a"
+                                            v-bind="props.action"
+                                            class="flex items-center"
                                         >
-                                            Profile
-                                        </DropdownLink>
-                                        <DropdownLink
-                                            :href="route('logout')"
-                                            method="post"
-                                            as="button"
-                                        >
-                                            Log Out
-                                        </DropdownLink>
+                                            <span :class="item.icon" />
+                                            <span class="ml-2">{{
+                                                item.label
+                                            }}</span>
+                                        </Link>
                                     </template>
-                                </Dropdown>
+                                </Menu>
                             </div>
                         </div>
 
                         <!-- Hamburger -->
                         <div class="-me-2 flex items-center sm:hidden">
-                            <button
+                            <Button
                                 @click="
                                     showingNavigationDropdown =
                                         !showingNavigationDropdown
                                 "
-                                class="inline-flex items-center justify-center rounded-md p-2 text-gray-400 transition duration-150 ease-in-out hover:bg-gray-100 hover:text-gray-500 focus:bg-gray-100 focus:text-gray-500 focus:outline-none dark:text-gray-500 dark:hover:bg-gray-900 dark:hover:text-gray-400 dark:focus:bg-gray-900 dark:focus:text-gray-400"
-                            >
-                                <svg
-                                    class="h-6 w-6"
-                                    stroke="currentColor"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path
-                                        :class="{
-                                            hidden: showingNavigationDropdown,
-                                            'inline-flex':
-                                                !showingNavigationDropdown,
-                                        }"
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2"
-                                        d="M4 6h16M4 12h16M4 18h16"
-                                    />
-                                    <path
-                                        :class="{
-                                            hidden: !showingNavigationDropdown,
-                                            'inline-flex':
-                                                showingNavigationDropdown,
-                                        }"
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2"
-                                        d="M6 18L18 6M6 6l12 12"
-                                    />
-                                </svg>
-                            </button>
+                                icon="pi pi-bars"
+                                text
+                                rounded
+                                class="!inline-flex !items-center !justify-center !p-2 !text-gray-400 dark:!text-gray-500"
+                            />
                         </div>
                     </div>
                 </div>
 
                 <!-- Responsive Navigation Menu -->
-                <div
-                    :class="{
-                        block: showingNavigationDropdown,
-                        hidden: !showingNavigationDropdown,
-                    }"
-                    class="sm:hidden"
+                <transition
+                    enter-active-class="transition ease-out duration-200"
+                    enter-from-class="opacity-0 scale-95"
+                    enter-to-class="opacity-100 scale-100"
+                    leave-active-class="transition ease-in duration-75"
+                    leave-from-class="opacity-100 scale-100"
+                    leave-to-class="opacity-0 scale-95"
                 >
-                    <div class="space-y-1 pb-3 pt-2">
-                        <ResponsiveNavLink
-                            :href="route('dashboard')"
-                            :active="route().current('dashboard')"
-                        >
-                            Dashboard
-                        </ResponsiveNavLink>
-                    </div>
-
-                    <!-- Responsive Settings Options -->
                     <div
-                        class="border-t border-gray-200 pb-1 pt-4 dark:border-gray-600"
+                        v-show="showingNavigationDropdown"
+                        class="sm:hidden"
+                        style="display: none"
                     >
-                        <div class="px-4">
-                            <div
-                                class="text-base font-medium text-gray-800 dark:text-gray-200"
-                            >
-                                {{ $page.props.auth.user.name }}
-                            </div>
-                            <div class="text-sm font-medium text-gray-500">
-                                {{ $page.props.auth.user.email }}
-                            </div>
+                        <div class="space-y-1 pb-3 pt-2">
+                            <!-- Replace Responsive NavLink with Button -->
+                            <Button
+                                @click="navigate('dashboard')"
+                                label="Dashboard"
+                                text
+                                :class="[
+                                    'block w-full border-l-4 py-2 pe-4 ps-3 text-left text-base font-medium transition duration-150 ease-in-out',
+                                    route().current('dashboard')
+                                        ? 'border-indigo-400 bg-indigo-50 text-indigo-700 focus:border-indigo-700 focus:bg-indigo-100 focus:text-indigo-800 dark:border-indigo-600 dark:bg-indigo-900/50 dark:text-indigo-300 dark:focus:border-indigo-300 dark:focus:bg-indigo-900 dark:focus:text-indigo-200'
+                                        : 'border-transparent text-gray-600 hover:border-gray-300 hover:bg-gray-50 hover:text-gray-800 focus:border-gray-300 focus:bg-gray-50 focus:text-gray-800 dark:text-gray-400 dark:hover:border-gray-600 dark:hover:bg-gray-700 dark:hover:text-gray-200 dark:focus:border-gray-600 dark:focus:bg-gray-700 dark:focus:text-gray-200',
+                                ]"
+                            />
+                            <!-- Add other Responsive NavLinks here -->
                         </div>
 
-                        <div class="mt-3 space-y-1">
-                            <ResponsiveNavLink :href="route('profile.edit')">
-                                Profile
-                            </ResponsiveNavLink>
-                            <ResponsiveNavLink
-                                :href="route('logout')"
-                                method="post"
-                                as="button"
-                            >
-                                Log Out
-                            </ResponsiveNavLink>
+                        <!-- Responsive Settings Options -->
+                        <div
+                            class="border-t border-gray-200 pb-1 pt-4 dark:border-gray-600"
+                        >
+                            <div class="px-4">
+                                <div
+                                    class="text-base font-medium text-gray-800 dark:text-gray-200"
+                                >
+                                    {{ user.name }}
+                                </div>
+                                <div class="text-sm font-medium text-gray-500">
+                                    {{ user.email }}
+                                </div>
+                            </div>
+
+                            <div class="mt-3 space-y-1">
+                                <!-- Replace Links with Buttons -->
+                                <Button
+                                    @click="navigate('profile.edit')"
+                                    label="Profile"
+                                    text
+                                    class="block w-full !px-4 !py-2 text-left !text-sm !leading-5 !text-gray-700 hover:!bg-gray-100 dark:!text-gray-300 dark:hover:!bg-gray-700"
+                                />
+                                <Button
+                                    @click="router.post(route('logout'))"
+                                    label="Log Out"
+                                    text
+                                    class="block w-full !px-4 !py-2 text-left !text-sm !leading-5 !text-gray-700 hover:!bg-gray-100 dark:!text-gray-300 dark:hover:!bg-gray-700"
+                                />
+                            </div>
                         </div>
                     </div>
-                </div>
+                </transition>
             </nav>
 
             <!-- Page Heading -->
