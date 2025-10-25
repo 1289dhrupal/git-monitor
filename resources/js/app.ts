@@ -7,7 +7,7 @@ import { createApp, DefineComponent, h } from 'vue';
 import { ZiggyVue } from '../../vendor/tightenco/ziggy';
 
 // PrimeVue and Theme imports
-import Aura from '@primevue/themes/aura'; // Import the new Aura theme
+import Aura from '@primeuix/themes/aura'; // Import the new Aura theme
 import 'primeicons/primeicons.css'; // Icons
 import PrimeVue from 'primevue/config';
 

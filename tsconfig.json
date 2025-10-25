@@ -1,20 +1,35 @@
 {
     "compilerOptions": {
-        "allowJs": true,
         "module": "ESNext",
-        "moduleResolution": "bundler",
+        "moduleResolution": "node",
         "jsx": "preserve",
         "strict": true,
-        "isolatedModules": true,
         "target": "ESNext",
+        "resolveJsonModule": true,
         "esModuleInterop": true,
-        "forceConsistentCasingInFileNames": true,
-        "noEmit": true,
-        "skipLibCheck": true,
+        "lib": [
+            "ESNext",
+            "DOM"
+        ],
+        "baseUrl": ".",
         "paths": {
-            "@/*": ["./resources/js/*"],
-            "ziggy-js": ["./vendor/tightenco/ziggy"]
-        }
+            "@/*": [
+                "resources/js/*"
+            ]
+        },
+        "types": [
+            "vite/client",
+            "node"
+        ]
     },
-    "include": ["resources/js/**/*.ts", "resources/js/**/*.vue"]
+    "include": [
+        "resources/js/**/*.ts",
+        "resources/js/**/*.d.ts", // This makes TS recognize our auto-generated types
+        "resources/js/**/*.vue",
+        "vite.config.ts"
+    ],
+    "exclude": [
+        "node_modules",
+        "public"
+    ]
 }
